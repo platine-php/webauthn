@@ -1,5 +1,34 @@
 <?php
 
+/**
+ * Platine Webauth
+ *
+ * Platine Webauthn is the implementation of webauthn specifications
+ *
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2020 Platine Webauth
+ * Copyright (c) Jakob Bennemann <github@jakob-bennemann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 declare(strict_types=1);
 
 namespace Platine\Webauthn\Entity;
@@ -32,10 +61,10 @@ class PublicKey implements JsonSerializable
     protected AuthenticatorSelection $authenticatorSelection;
 
     /**
-     * The ReplyParty
-     * @var ReplyParty
+     * The RelyingParty
+     * @var RelyingParty
      */
-    protected ReplyParty $replyParty;
+    protected RelyingParty $relyingParty;
 
     /**
      * The UserInfo
@@ -74,10 +103,10 @@ class PublicKey implements JsonSerializable
     protected string $attestation;
 
     /**
-     * The reply party id. This is used only for login
+     * The relying party id. This is used only for login
      * @var string
      */
-    protected string $replyPartyId = '';
+    protected string $relyingPartyId = '';
 
     /**
      * The user verification type. This is used only for login
@@ -128,11 +157,11 @@ class PublicKey implements JsonSerializable
 
     /**
      *
-     * @return ReplyParty
+     * @return RelyingParty
      */
-    public function getReplyParty(): ReplyParty
+    public function getRelyingParty(): RelyingParty
     {
-        return $this->replyParty;
+        return $this->relyingParty;
     }
 
     /**
@@ -193,9 +222,9 @@ class PublicKey implements JsonSerializable
      *
      * @return string
      */
-    public function getReplyPartyId(): string
+    public function getRelyingPartyId(): string
     {
-        return $this->replyPartyId;
+        return $this->relyingPartyId;
     }
 
     /**
@@ -242,12 +271,12 @@ class PublicKey implements JsonSerializable
 
     /**
      *
-     * @param ReplyParty $replyParty
+     * @param RelyingParty $relyingParty
      * @return $this
      */
-    public function setReplyParty(ReplyParty $replyParty): self
+    public function setRelyingParty(RelyingParty $relyingParty): self
     {
-        $this->replyParty = $replyParty;
+        $this->relyingParty = $relyingParty;
         return $this;
     }
 
@@ -323,12 +352,12 @@ class PublicKey implements JsonSerializable
 
     /**
      *
-     * @param string $replyPartyId
+     * @param string $relyingPartyId
      * @return $this
      */
-    public function setReplyPartyId(string $replyPartyId): self
+    public function setRelyingPartyId(string $relyingPartyId): self
     {
-        $this->replyPartyId = $replyPartyId;
+        $this->relyingPartyId = $relyingPartyId;
         return $this;
     }
 

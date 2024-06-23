@@ -1,5 +1,34 @@
 <?php
 
+/**
+ * Platine Webauth
+ *
+ * Platine Webauthn is the implementation of webauthn specifications
+ *
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2020 Platine Webauth
+ * Copyright (c) Jakob Bennemann <github@jakob-bennemann.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 declare(strict_types=1);
 
 namespace Platine\Webauthn;
@@ -10,7 +39,7 @@ use Platine\Webauthn\Attestation\AuthenticatorData;
 use Platine\Webauthn\Entity\AuthenticatorSelection;
 use Platine\Webauthn\Entity\PublicKey;
 use Platine\Webauthn\Entity\PublicKeyAuthParam;
-use Platine\Webauthn\Entity\ReplyParty;
+use Platine\Webauthn\Entity\RelyingParty;
 use Platine\Webauthn\Entity\UserCredential;
 use Platine\Webauthn\Entity\UserInfo;
 use Platine\Webauthn\Enum\AttestationType;
@@ -46,10 +75,10 @@ class Webauthn
     protected int $signatureCounter = 0;
 
     /**
-     * The reply party entity
-     * @var ReplyParty
+     * The relying party entity
+     * @var RelyingParty
      */
-    protected ReplyParty $replyParty;
+    protected RelyingParty $relyingParty;
 
     /**
      * The certificates files path
@@ -81,10 +110,10 @@ class Webauthn
         $this->config = $config;
         $this->formats = $this->normalizeFormats($allowedFormats);
 
-        $this->replyParty = new ReplyParty(
-            $config->get('reply_party_id'),
-            $config->get('reply_party_name'),
-            $config->get('reply_party_logo')
+        $this->relyingParty = new RelyingParty(
+            $config->get('relying_party_id'),
+            $config->get('relying_party_name'),
+            $config->get('relying_party_logo')
         );
     }
 
@@ -130,10 +159,10 @@ class Webauthn
             $attestation = AttestationType::NONE;
         }
 
-        $replyParty = new ReplyParty(
-            $this->config->get('reply_party_id'),
-            $this->config->get('reply_party_name'),
-            $this->config->get('reply_party_logo')
+        $relyingParty = new RelyingParty(
+            $this->config->get('relying_party_id'),
+            $this->config->get('relying_party_name'),
+            $this->config->get('relying_party_logo')
         );
 
         $userInfo = new UserInfo(
@@ -150,7 +179,7 @@ class Webauthn
 
         $publicKey = (new PublicKey())
                       ->setUserInfo($userInfo)
-                      ->setReplyParty($replyParty)
+                      ->setRelyingParty($relyingParty)
                       ->setAuthenticatorSelection($authenticatorSelection)
                       ->setExcludeCredentials($excludeCredentials)
                       ->setChallenge($this->createChallenge())
@@ -186,7 +215,7 @@ class Webauthn
         }
 
         $publicKey = (new PublicKey())
-                      ->setReplyPartyId($this->replyParty->getId())
+                      ->setRelyingPartyId($this->relyingParty->getId())
                       ->setAllowCredentials($allowedCredentials)
                       ->setChallenge($this->createChallenge())
                       ->setTimeout($this->config->get('timeout'))
@@ -241,7 +270,7 @@ class Webauthn
             throw new WebauthnException('Invalid challenge provided');
         }
 
-        // 5. Verify that the value of C.origin matches the Replying Party's origin.
+        // 5. Verify that the value of C.origin matches the Relying Party's origin.
         if (! isset($clientData->origin) || $this->checkOrigin($clientData->origin) === false) {
             throw new WebauthnException('Invalid origin provided');
         }
@@ -250,8 +279,8 @@ class Webauthn
 
         // 9. Verify that the RP ID hash in authData is indeed the SHA-256
         // hash of the RP ID expected by the RP.
-        if ($attestation->validateReplyPartyIdHash($this->replyParty->getHashId()) === false) {
-            throw new WebauthnException('Invalid reply party id hash provided');
+        if ($attestation->validateRelyingPartyIdHash($this->relyingParty->getHashId()) === false) {
+            throw new WebauthnException('Invalid relying party id hash provided');
         }
 
         // 14. Verify that attStmt is a correct attestation statement, conveying
@@ -265,7 +294,7 @@ class Webauthn
                 ? $attestation->validateRootCertificate($this->certificates)
                 : false;
 
-        if ($failIfRootCertificateMismatch && count($this->certificates) && $isRootValid === false) {
+        if ($failIfRootCertificateMismatch && count($this->certificates) > 0 && $isRootValid === false) {
             throw new WebauthnException('Invalid root certificate');
         }
 
@@ -289,7 +318,7 @@ class Webauthn
 
         // prepare data to store for future logins
         $data = [
-            'rp_id' => $this->replyParty->getId(),
+            'rp_id' => $this->relyingParty->getId(),
             'attestation_format' => $attestation->getFormatName(),
             'credential_id' => bin2hex($attestation->getAuthenticatorData()->getCredentialId()),
             'credential_public_key' => $attestation->getAuthenticatorData()->getPublicKeyPEM(),
@@ -372,15 +401,15 @@ class Webauthn
             throw new WebauthnException('Invalid challenge provided');
         }
 
-        // 9. Verify that the value of C.origin matches the Replying Party's origin.
+        // 9. Verify that the value of C.origin matches the Relying Party's origin.
         if (! isset($clientData->origin) || $this->checkOrigin($clientData->origin) === false) {
             throw new WebauthnException('Invalid origin provided');
         }
 
         // 11. Verify that the rpIdHash in authData is the SHA-256 hash
-        // of the RP ID expected by the Replying Party.
-        if ($authenticator->getReplyPartyIdHash() !== $this->replyParty->getHashId()) {
-            throw new WebauthnException('Invalid reply party id hash provided');
+        // of the RP ID expected by the Relying Party.
+        if ($authenticator->getRelyingPartyIdHash() !== $this->relyingParty->getHashId()) {
+            throw new WebauthnException('Invalid relying party id hash provided');
         }
 
         // 12. Verify that the User Present bit of the flags in authData is set
@@ -404,8 +433,8 @@ class Webauthn
         $dataToVerify .= $authenticatorData;
         $dataToVerify .= $clientDataHash;
 
-        $publickKey = openssl_pkey_get_public($credentialPublicKey);
-        if ($publickKey === false) {
+        $publicKey = openssl_pkey_get_public($credentialPublicKey);
+        if ($publicKey === false) {
             throw new WebauthnException('Invalid public key provided');
         }
 
@@ -413,7 +442,7 @@ class Webauthn
             openssl_verify(
                 $dataToVerify,
                 $signature,
-                $publickKey,
+                $publicKey,
                 OPENSSL_ALGO_SHA256
             ) !== 1
         ) {
@@ -462,7 +491,7 @@ class Webauthn
         // The origin's scheme must be https and not be ignored/whitelisted
         $url = new Uri($origin);
         if (
-            ! in_array($this->replyParty->getId(), $this->config->get('ignore_origins')) &&
+            ! in_array($this->relyingParty->getId(), $this->config->get('ignore_origins')) &&
             $url->getScheme() !== 'https'
         ) {
             return false;
@@ -470,7 +499,7 @@ class Webauthn
 
         // The RP ID must be equal to the origin's effective domain, or a registrable
         // domain suffix of the origin's effective domain.
-        return preg_match('/' . preg_quote($this->replyParty->getId()) . '$/i', $url->getHost()) === 1;
+        return preg_match('/' . preg_quote($this->relyingParty->getId()) . '$/i', $url->getHost()) === 1;
     }
 
     /**
@@ -479,8 +508,8 @@ class Webauthn
      */
     protected function createChallenge(): ByteBuffer
     {
-        $length = $this->config->get('challenge_length');
         if ($this->challenge === null) {
+            $length = $this->config->get('challenge_length');
             $this->challenge = ByteBuffer::randomBuffer($length);
         }
 
@@ -496,7 +525,7 @@ class Webauthn
     {
         $supportedFormats = KeyFormat::all();
         if (count($formats) === 0) {
-            return array_values($supportedFormats);
+            return $supportedFormats;
         }
 
         $desiredFormats = array_filter($formats, function ($entry) use ($supportedFormats) {
@@ -504,9 +533,9 @@ class Webauthn
         });
 
         if (count($desiredFormats) > 0) {
-            return array_values($desiredFormats);
+            return $desiredFormats;
         }
 
-        return array_values($supportedFormats);
+        return $supportedFormats;
     }
 }
