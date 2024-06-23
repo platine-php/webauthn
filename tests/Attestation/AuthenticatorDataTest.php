@@ -30,7 +30,7 @@ class AuthenticatorDataTest extends PlatineTestCase
         $this->assertTrue($o->isUserPresent());
         $this->assertTrue($o->isUserVerified());
         $this->assertEquals(0, $o->getSignatureCount());
-        $this->assertEquals(
+        $this->assertCommandOutput(
             getPublicKeyPemTestData(),
             $o->getPublicKeyPEM()
         );
@@ -224,7 +224,7 @@ class AuthenticatorDataTest extends PlatineTestCase
 
        // $this->expectException(WebauthnException::class);
         $res = $o->getPublicKeyPEM();
-        $this->assertEquals(
+        $this->assertCommandOutput(
             '-----BEGIN PUBLIC KEY-----
 MBkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDAgAE
 -----END PUBLIC KEY-----
