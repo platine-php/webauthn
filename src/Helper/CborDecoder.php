@@ -126,7 +126,7 @@ class CborDecoder
             case 24:
                 $value = $buffer->getByteValue($offset);
                 $offset++;
-                return self::parseSimplevalue($value);
+                return self::parseSimpleValue($value);
 
             case 25:
                 $floatValue = $buffer->getHalfFloatValue($offset);
@@ -155,7 +155,7 @@ class CborDecoder
                 throw new WebauthnException(sprintf('Indefinite value [%d] length is not supported', $value));
         }
 
-        return self::parseSimplevalue($value);
+        return self::parseSimpleValue($value);
     }
 
     /**
@@ -163,7 +163,7 @@ class CborDecoder
      * @param int $value
      * @return bool|null
      */
-    protected static function parseSimplevalue(int $value): ?bool
+    protected static function parseSimpleValue(int $value): ?bool
     {
         if ($value === 20) {
             return false;

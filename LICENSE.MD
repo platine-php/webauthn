@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2020 Platine Webauthn
+Copyright (c) 2020 Platine Webauthn  
 Copyright (c) Jakob Bennemann <github@jakob-bennemann.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

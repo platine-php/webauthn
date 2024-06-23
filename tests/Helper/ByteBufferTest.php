@@ -148,6 +148,16 @@ class ByteBufferTest extends PlatineTestCase
         $o->getUint64Value(0);
     }
 
+    public function testGetUint32ValueSignedIntegerOverflow()
+    {
+        global $mock_unpack_to_value;
+        $mock_unpack_to_value = [0, -1];
+
+        $o = new ByteBuffer('{1234567890');
+        $this->expectException(WebauthnException::class);
+        $o->getUint32Value(0);
+    }
+
     public function testRandomBuffer()
     {
         global $mock_function_exists_to_false,
@@ -191,8 +201,10 @@ class ByteBufferTest extends PlatineTestCase
         $this->assertEquals(1.627206802368164E-5, $o->getHalfFloatValue(0));
 
         // Exponent = 31
-        $o1 = ByteBuffer::fromBase64Url('OKOKVWuVX8gnyu85DpmHzhWbt2g.TniDsqaFA3olAloC6');
-        $this->assertEquals(14499, $o1->getUint16Value(0));
+        $t = $this->getMockInstance(ByteBuffer::class, ['getUint16Value' => 97394], ['getHalfFloatValue']);
+        $this->setPropertyValue(ByteBuffer::class, $t, 'data', '123456');
+        $this->setPropertyValue(ByteBuffer::class, $t, 'length', 6);
+        $this->assertNan($t->getHalfFloatValue(0));
     }
 
     /**

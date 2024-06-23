@@ -43,7 +43,10 @@
         "psr-4":{
             "Platine\\Test\\": "tests"
         },
-        "files": ["tests/fixtures/mocks.php"]
+        "files": [
+            "tests/fixtures/mocks.php",
+            "tests/fixtures/fixtures.php"
+        ]
     },
     
     "config": {

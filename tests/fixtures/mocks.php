@@ -28,6 +28,40 @@ $mock_unpack_to_value = false;
 $mock_random_bytes_to_value = false;
 $mock_openssl_random_pseudo_bytes_to_value = false;
 $mock_openssl_random_pseudo_bytes_to_false = false;
+$mock_is_int_to_false = false;
+$mock_is_string_to_false = false;
+$mock_ord_to_value = false;
+
+
+function ord(string $val)
+{
+    global $mock_ord_to_value;
+    if ($mock_ord_to_value) {
+        return $mock_ord_to_value;
+    } else {
+        return \ord($val);
+    }
+}
+
+function is_string($val)
+{
+    global $mock_is_string_to_false;
+    if ($mock_is_string_to_false) {
+        return false;
+    } else {
+        return \is_string($val);
+    }
+}
+
+function is_int($val)
+{
+    global $mock_is_int_to_false;
+    if ($mock_is_int_to_false) {
+        return false;
+    } else {
+        return \is_int($val);
+    }
+}
 
 function random_bytes(int $val)
 {
