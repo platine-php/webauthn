@@ -68,7 +68,7 @@ class Webauthn
      * @param WebauthnConfiguration $config
      * @param array<string> $allowedFormats
      */
-    public function __construct(WebauthnConfiguration $config, array $allowedFormats)
+    public function __construct(WebauthnConfiguration $config, array $allowedFormats = [])
     {
         if (! function_exists('openssl_open')) {
             throw new WebauthnException('OpenSSL module not installed in this platform');
