@@ -20,13 +20,11 @@ class WebauthnTest extends PlatineTestCase
     {
         $cfg = new WebauthnConfiguration([]);
         $s = new Webauthn($cfg);
-        
+
         $this->assertInstanceOf(
             WebauthnConfiguration::class,
             $this->getPropertyValue(Webauthn::class, $s, 'config')
         );
         $this->assertInstanceOf(Webauthn::class, $s);
     }
-
-    
 }

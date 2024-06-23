@@ -435,7 +435,7 @@ class AuthenticatorData implements JsonSerializable
         if ($i !== 0) {
             $bytes = substr($bytes, $i);
         }
-        
+
         // If most significant bit is set, prefix with another zero
         // to prevent it being seen as negative number
         if ((ord($bytes[0]) & 0x80) !== 0) {
