@@ -2,9 +2,65 @@
 
 declare(strict_types=1);
 
+namespace Platine\Webauthn\Attestation;
+
+$mock_unpack_to_false = false;
+$mock_unpack_to_value = false;
+$mock_unpack_to_array = [];
+$mock_substr_to_value = [];
+
+function substr(string $string, int $offset, $length = -1)
+{
+    global $mock_substr_to_value;
+    if ($mock_substr_to_value) {
+        return $mock_substr_to_value;
+    }
+
+    return \substr($string, $offset, $length);
+}
+
+function unpack(string $format, string $string, int $offset = 0)
+{
+    global $mock_unpack_to_false, $mock_unpack_to_value, $mock_unpack_to_array;
+    if ($mock_unpack_to_false) {
+        return false;
+    }
+
+    if ($mock_unpack_to_value) {
+        return $mock_unpack_to_value;
+    }
+
+    if ($mock_unpack_to_array) {
+        if (isset($mock_unpack_to_array[$format])) {
+            return $mock_unpack_to_array[$format];
+        }
+    }
+
+    return \unpack($format, $string, $offset);
+}
+
+
 namespace Platine\Webauthn\Entity;
 
 $mock_hash_to_string = false;
+$mock_unpack_to_array = [];
+
+
+
+function unpack(string $format, string $string, int $offset = 0)
+{
+    global $mock_unpack_to_array;
+
+
+    if ($mock_unpack_to_array) {
+        if (isset($mock_unpack_to_array[$format])) {
+            return $mock_unpack_to_array[$format];
+        }
+    }
+
+    return \unpack($format, $string, $offset);
+}
+
 
 function hash(string $algo, string $data, bool $binary = false, array $options = [])
 {

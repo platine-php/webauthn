@@ -34,6 +34,9 @@ declare(strict_types=1);
 namespace Platine\Webauthn;
 
 use Exception;
+use Platine\Http\Uri;
+use Platine\Stdlib\Helper\Json;
+use Platine\Stdlib\Helper\Path;
 use Platine\Webauthn\Attestation\AttestationData;
 use Platine\Webauthn\Attestation\AuthenticatorData;
 use Platine\Webauthn\Entity\AuthenticatorSelection;
@@ -47,8 +50,6 @@ use Platine\Webauthn\Enum\KeyFormat;
 use Platine\Webauthn\Enum\TransportType;
 use Platine\Webauthn\Exception\WebauthnException;
 use Platine\Webauthn\Helper\ByteBuffer;
-use Platine\Http\Uri;
-use Platine\Stdlib\Helper\Json;
 
 /**
  * @class Webauthn
@@ -115,6 +116,18 @@ class Webauthn
             $config->get('relying_party_name'),
             $config->get('relying_party_logo')
         );
+    }
+
+    /**
+     * Add a root certificate to verify new registrations
+     * @param string $path
+     * @return $this
+     */
+    public function addRootCertificate(string $path): self
+    {
+        $this->certificates[] = Path::realPath($path);
+
+        return $this;
     }
 
     /**

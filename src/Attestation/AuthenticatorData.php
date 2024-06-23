@@ -251,6 +251,25 @@ class AuthenticatorData implements JsonSerializable
     }
 
     /**
+     *
+     * @return array<string, mixed>
+     */
+    public function getExtensionData(): array
+    {
+        return $this->extensionData;
+    }
+
+    /**
+     *
+     * @return AttestedCredentialData|null
+     */
+    public function getAttestedCredentialData(): ?AttestedCredentialData
+    {
+        return $this->attestedCredentialData;
+    }
+
+
+    /**
     * {@inheritdoc}
     * @return mixed
     */
