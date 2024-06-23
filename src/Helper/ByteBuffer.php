@@ -215,9 +215,11 @@ class ByteBuffer implements JsonSerializable, Serializable
      */
     public function getUint64Value(int $offset): int
     {
+        // @codeCoverageIgnoreStart
         if (PHP_INT_SIZE < 8) {
             throw new WebauthnException('64-bit values not supported by this system');
         }
+        // @codeCoverageIgnoreEnd
 
         if ($offset < 0 || ($offset + 8) > $this->length) {
             throw new WebauthnException(sprintf(
