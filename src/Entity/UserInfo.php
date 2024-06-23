@@ -105,43 +105,6 @@ class UserInfo implements JsonSerializable
     }
 
     /**
-     *
-     * @param ByteBuffer|string $id
-     * @return $this
-     */
-    public function setId($id): self
-    {
-        if (is_string($id)) {
-            $id = new ByteBuffer($id);
-        }
-
-        $this->id = $id;
-        return $this;
-    }
-
-    /**
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     *
-     * @param string $displayName
-     * @return $this
-     */
-    public function setDisplayName(string $displayName): self
-    {
-        $this->displayName = $displayName;
-        return $this;
-    }
-
-    /**
     * {@inheritdoc}
     * @return mixed
     */

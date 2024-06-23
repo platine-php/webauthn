@@ -81,17 +81,6 @@ class PublicKeyCredentialParam implements JsonSerializable
     }
 
     /**
-     *
-     * @param int $alg
-     * @return $this
-     */
-    public function setAlg(int $alg): self
-    {
-        $this->alg = $alg;
-        return $this;
-    }
-
-    /**
     * {@inheritdoc}
     * @return mixed
     */

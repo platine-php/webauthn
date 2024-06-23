@@ -100,39 +100,6 @@ class RelyingParty implements JsonSerializable
     }
 
     /**
-     *
-     * @param string $id
-     * @return $this
-     */
-    public function setId(string $id): self
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    /**
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     *
-     * @param string $logo
-     * @return $this
-     */
-    public function setLogo(string $logo): self
-    {
-        $this->logo = $logo;
-        return $this;
-    }
-
-    /**
      * Return the hashed id
      * @return string
      */

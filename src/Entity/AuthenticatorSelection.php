@@ -127,50 +127,6 @@ class AuthenticatorSelection implements JsonSerializable
     }
 
     /**
-     *
-     * @param string $authenticatorAttachment
-     * @return $this
-     */
-    public function setAuthenticatorAttachment(string $authenticatorAttachment): self
-    {
-        $this->authenticatorAttachment = $authenticatorAttachment;
-        return $this;
-    }
-
-    /**
-     *
-     * @param string $residentKeyType
-     * @return $this
-     */
-    public function setResidentKeyType(string $residentKeyType): self
-    {
-        $this->residentKeyType = $residentKeyType;
-        return $this;
-    }
-
-    /**
-     *
-     * @param bool $requireResidentKey
-     * @return $this
-     */
-    public function setRequireResidentKey(bool $requireResidentKey): self
-    {
-        $this->requireResidentKey = $requireResidentKey;
-        return $this;
-    }
-
-    /**
-     *
-     * @param string $userVerificationType
-     * @return $this
-     */
-    public function setUserVerificationType(string $userVerificationType): self
-    {
-        $this->userVerificationType = $userVerificationType;
-        return $this;
-    }
-
-    /**
     * {@inheritdoc}
     * @return mixed
     */
