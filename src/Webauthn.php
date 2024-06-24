@@ -120,12 +120,18 @@ class Webauthn
 
     /**
      * Add a root certificate to verify new registrations
-     * @param string $path
+     * @param string|array<string> $path
      * @return $this
      */
-    public function addRootCertificate(string $path): self
+    public function addRootCertificate($path): self
     {
-        $this->certificates[] = Path::realPath($path);
+        if (is_array($path)) {
+            foreach ($path as $p) {
+                $this->certificates[] = Path::realPath($p);
+            }
+        } else {
+            $this->certificates[] = Path::realPath($path);
+        }
 
         return $this;
     }

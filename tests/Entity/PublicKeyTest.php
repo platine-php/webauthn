@@ -88,6 +88,6 @@ class PublicKeyTest extends PlatineTestCase
 
         $json = $o->jsonSerialize();
 
-        $this->assertCount(7, $json);
+        $this->assertCount(8, $json);
     }
 }

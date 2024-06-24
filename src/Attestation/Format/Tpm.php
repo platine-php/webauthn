@@ -78,7 +78,7 @@ class Tpm extends BaseFormat
 
     /**
      * Create new instance
-     * @param array<string, mixed> $attestationData
+     * @param array<string|int, mixed> $attestationData
      * @param AuthenticatorData $authenticatorData
      */
     public function __construct(

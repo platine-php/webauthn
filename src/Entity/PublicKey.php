@@ -100,7 +100,7 @@ class PublicKey implements JsonSerializable
      * The attestation to use
      * @var string
      */
-    protected string $attestation;
+    protected string $attestation = '';
 
     /**
      * The relying party id. This is used only for login

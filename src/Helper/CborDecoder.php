@@ -57,7 +57,7 @@ class CborDecoder
      */
     public static function decode($data)
     {
-        if (is_string($data)) {
+        if (! $data instanceof ByteBuffer) {
             $data = new ByteBuffer($data);
         }
 
@@ -82,7 +82,7 @@ class CborDecoder
      */
     public static function decodeInPlace($data, int $startoffset, ?int $endOffset = null)
     {
-        if (is_string($data)) {
+        if (! $data instanceof ByteBuffer) {
             $data = new ByteBuffer($data);
         }
 

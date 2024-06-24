@@ -44,7 +44,7 @@ abstract class BaseFormat implements JsonSerializable
 {
     /**
      * The attestation object data
-     * @var array<string, mixed>
+     * @var array<string|int, mixed>
      */
     protected array $attestationData;
 
@@ -68,7 +68,7 @@ abstract class BaseFormat implements JsonSerializable
 
     /**
      * Create new instance
-     * @param array<string, mixed> $attestationData
+     * @param array<string|int, mixed> $attestationData
      * @param AuthenticatorData $authenticatorData
      */
     public function __construct(
