@@ -85,23 +85,13 @@ class AttestationData implements JsonSerializable
             throw new WebauthnException('Invalid attestation format provided (attStmt not available)');
         }
 
-        if (! array_key_exists('authData', $enc) || ! $enc['authData'] instanceof ByteBuffer) {
-            throw new WebauthnException('Invalid attestation format provided (authData not available)');
-        }
-
         $this->formatName = $enc['fmt'];
-        $this->authenticatorData = new AuthenticatorData($enc['authData']->getBinaryString());
 
-        if (! in_array($this->formatName, $allowedFormats)) {
-            throw new WebauthnException(sprintf(
-                'Invalid attestation format [%s], allowed [%s]',
-                $this->formatName,
-                implode(', ', $allowedFormats)
-            ));
-        }
+        // Set attestation data
+        $this->setAuthenticatorData($enc);
 
         // Create attestation format based on the provided format name
-        $this->createAttestationFormat($enc);
+        $this->createAttestationFormat($enc, $allowedFormats);
     }
 
     /**
@@ -239,12 +229,35 @@ class AttestationData implements JsonSerializable
     }
 
     /**
-     * Create the attestation format
-     * @param array<string, mixed> $enc the encoded data
+     * Set the authenticator data
+     * @param array<string|int, mixed> $enc
      * @return void
      */
-    protected function createAttestationFormat(array $enc): void
+    protected function setAuthenticatorData(array $enc): void
     {
+        if (! array_key_exists('authData', $enc) || ! $enc['authData'] instanceof ByteBuffer) {
+            throw new WebauthnException('Invalid attestation format provided (authData not available)');
+        }
+
+        $this->authenticatorData = new AuthenticatorData($enc['authData']->getBinaryString());
+    }
+
+    /**
+     * Create the attestation format
+     * @param array<string|int, mixed> $enc the encoded data
+     * @param array<string> $allowedFormats the allowed format
+     * @return void
+     */
+    protected function createAttestationFormat(array $enc, array $allowedFormats): void
+    {
+        if (! in_array($this->formatName, $allowedFormats)) {
+            throw new WebauthnException(sprintf(
+                'Invalid attestation format [%s], allowed [%s]',
+                $this->formatName,
+                implode(', ', $allowedFormats)
+            ));
+        }
+
         switch ($this->formatName) {
             case KeyFormat::FIDO_U2FA:
                 $this->format = new FidoU2F($enc, $this->authenticatorData);

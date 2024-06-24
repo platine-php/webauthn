@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Platine\Test\Fixture\Webauthn;
 
-function getCborBinaryTestData(): string
+use Platine\Webauthn\Attestation\Format\BaseFormat;
+
+class MyBaseFormat extends BaseFormat
+{
+}
+
+function getCborAttestationDataTestData(): string
 {
     return base64_decode(
         'o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVkBZ0mWDeWIDoxodDQXD2R2YFu'

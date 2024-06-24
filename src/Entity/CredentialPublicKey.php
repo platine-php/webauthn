@@ -125,14 +125,8 @@ class CredentialPublicKey implements JsonSerializable
         $this->kty = $enc[self::COSE_KTY];
         $this->alg = $enc[self::COSE_ALG];
 
-        switch ($this->alg) {
-            case self::EC2_ES256:
-                $this->createES256($enc);
-                break;
-            case self::RSA_RS256:
-                $this->createRSA256($enc);
-                break;
-        }
+        // Update properties
+        $this->create($enc);
     }
 
     /**
@@ -205,6 +199,23 @@ class CredentialPublicKey implements JsonSerializable
     public function jsonSerialize()
     {
         return get_object_vars($this);
+    }
+
+    /**
+     * Update properties based on the given data received
+     * @param array<string, mixed> $enc
+     * @return void
+     */
+    protected function create(array $enc): void
+    {
+        switch ($this->alg) {
+            case self::EC2_ES256:
+                $this->createES256($enc);
+                break;
+            case self::RSA_RS256:
+                $this->createRSA256($enc);
+                break;
+        }
     }
 
     /**

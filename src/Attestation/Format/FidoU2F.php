@@ -100,7 +100,7 @@ class FidoU2F extends BaseFormat
         }
 
         if (! $attestationStatement['x5c'][0] instanceof ByteBuffer) {
-            throw new WebauthnException('Invalid X5C certificate');
+            throw new WebauthnException('Invalid X5C certificate must be Byte Buffer)');
         }
 
         $this->signature = $attestationStatement['sig']->getBinaryString();
@@ -114,7 +114,7 @@ class FidoU2F extends BaseFormat
     {
         $pem = '-----BEGIN CERTIFICATE-----' . "\n";
         $pem .= chunk_split(base64_encode($this->x5c), 64, "\n");
-        $pem = '-----END CERTIFICATE-----' . "\n";
+        $pem .= '-----END CERTIFICATE-----' . "\n";
 
         return $pem;
     }

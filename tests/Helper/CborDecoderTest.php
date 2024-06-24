@@ -9,7 +9,7 @@ use Platine\Webauthn\Exception\WebauthnException;
 use Platine\Webauthn\Helper\ByteBuffer;
 use Platine\Webauthn\Helper\CborDecoder;
 
-use function Platine\Test\Fixture\Webauthn\getCborBinaryTestData;
+use function Platine\Test\Fixture\Webauthn\getCborAttestationDataTestData;
 
 /**
  * CborDecoder class tests
@@ -82,7 +82,7 @@ class CborDecoderTest extends PlatineTestCase
 
     public function testDecode(): void
     {
-        $data = getCborBinaryTestData();
+        $data = getCborAttestationDataTestData();
 
         $res = CborDecoder::decode($data);
 
@@ -173,7 +173,7 @@ class CborDecoderTest extends PlatineTestCase
 
     public function testDecodeInPlace(): void
     {
-        $data = getCborBinaryTestData();
+        $data = getCborAttestationDataTestData();
 
         $res = CborDecoder::decodeInPlace($data, 5, 45);
 

@@ -329,21 +329,21 @@ class Webauthn
             $this->signatureCounter = $signCount;
         }
 
-        // prepare data to store for future logins
+        // Prepare data to store for future logins
         $data = [
             'rp_id' => $this->relyingParty->getId(),
             'attestation_format' => $attestation->getFormatName(),
             'credential_id' => bin2hex($attestation->getAuthenticatorData()->getCredentialId()),
             'credential_public_key' => $attestation->getAuthenticatorData()->getPublicKeyPEM(),
-            'certificate_chain' => $attestation->getCertificateChain(),
-            'certificate' => $attestation->getCertificatePem(),
-            'certificate_issuer' => $attestation->getCertificateIssuer(),
-            'certificate_subject' => $attestation->getCertificateSubject(),
-            'root_certificate_valid' => $isRootValid,
+            'cert_chain' => $attestation->getCertificateChain(),
+            'cert' => $attestation->getCertificatePem(),
+            'cert_issuer' => $attestation->getCertificateIssuer(),
+            'cert_subject' => $attestation->getCertificateSubject(),
+            'is_root_cert_valid' => $isRootValid,
             'signature_counter' => $this->signatureCounter,
             'aaguid' => bin2hex($attestation->getAuthenticatorData()->getAaguid()),
-            'user_present' => $userPresent,
-            'user_verified' => $userVerified,
+            'is_user_present' => $userPresent,
+            'is_user_verified' => $userVerified,
         ];
 
 

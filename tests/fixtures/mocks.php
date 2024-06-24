@@ -2,12 +2,81 @@
 
 declare(strict_types=1);
 
+namespace Platine\Webauthn\Attestation\Format;
+
+$mock_openssl_pkey_get_public_to_value = false;
+$mock_openssl_verify_to_value = false;
+$mock_openssl_x509_checkpurpose_to_value = false;
+$mock_openssl_x509_parse_to_value = [];
+$mock_hash_to_value = [];
+
+function hash(string $algo, string $data, bool $binary = false)
+{
+    global $mock_hash_to_value;
+    if ($mock_hash_to_value) {
+        return $mock_hash_to_value;
+    }
+
+    return \hash($algo, $data, $binary);
+}
+
+function openssl_x509_parse($certificate, $name = true)
+{
+    global $mock_openssl_x509_parse_to_value;
+    if ($mock_openssl_x509_parse_to_value) {
+        return $mock_openssl_x509_parse_to_value;
+    }
+
+    return \openssl_x509_parse($certificate, $name);
+}
+
+function openssl_x509_checkpurpose($certificate, $purpose, $ca_info = [], $untrusted_certificates_file = null)
+{
+    global $mock_openssl_x509_checkpurpose_to_value;
+    if ($mock_openssl_x509_checkpurpose_to_value) {
+        return $mock_openssl_x509_checkpurpose_to_value;
+    }
+
+    return \openssl_x509_checkpurpose($certificate, $purpose, $ca_info, $untrusted_certificates_file);
+}
+
+function openssl_verify($data, $signature, $public_key, $algorithm)
+{
+    global $mock_openssl_verify_to_value;
+    if ($mock_openssl_verify_to_value) {
+        return $mock_openssl_verify_to_value;
+    }
+
+    return \openssl_verify($data, $signature, $public_key, $algorithm);
+}
+
+function openssl_pkey_get_public($public_key)
+{
+    global $mock_openssl_pkey_get_public_to_value;
+    if ($mock_openssl_pkey_get_public_to_value) {
+        return $mock_openssl_pkey_get_public_to_value;
+    }
+
+    return \openssl_pkey_get_public($public_key);
+}
+
 namespace Platine\Webauthn\Attestation;
 
 $mock_unpack_to_false = false;
 $mock_unpack_to_value = false;
 $mock_unpack_to_array = [];
 $mock_substr_to_value = [];
+$mock_openssl_x509_parse_to_value = [];
+
+function openssl_x509_parse($certificate, $name = true)
+{
+    global $mock_openssl_x509_parse_to_value;
+    if ($mock_openssl_x509_parse_to_value) {
+        return $mock_openssl_x509_parse_to_value;
+    }
+
+    return \openssl_x509_parse($certificate, $name);
+}
 
 function substr(string $string, int $offset, $length = -1)
 {

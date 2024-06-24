@@ -78,10 +78,7 @@ class Packed extends BaseFormat
             ! array_key_exists('alg', $attestationStatement) ||
             $this->getCoseAlgorithm($attestationStatement['alg']) === null
         ) {
-            throw new WebauthnException(sprintf(
-                'Unsupported algorithm [%d]',
-                $attestationStatement['alg']
-            ));
+            throw new WebauthnException('Unsupported algorithm or not provided');
         }
 
         if (
