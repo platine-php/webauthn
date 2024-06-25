@@ -52,7 +52,7 @@ class AuthenticatorSelection implements JsonSerializable
      * The resident key type
      * @var string
      */
-    protected string $residentKeyType;
+    protected string $residentKey;
 
     /**
      * require resident key
@@ -64,7 +64,7 @@ class AuthenticatorSelection implements JsonSerializable
      * The user verification type
      * @var string
      */
-    protected string $userVerificationType;
+    protected string $userVerification;
 
     /**
      * Create new instance
@@ -78,11 +78,11 @@ class AuthenticatorSelection implements JsonSerializable
         bool $crossPlatform = false
     ) {
         $this->requireResidentKey = $requireResidentKey;
-        $this->residentKeyType = UserVerificationType::DISCOURAGED;
+        $this->residentKey = UserVerificationType::DISCOURAGED;
 
-        $this->userVerificationType = $userVerificationType;
+        $this->userVerification = $userVerificationType;
         if ($requireResidentKey) {
-            $this->residentKeyType = $userVerificationType;
+            $this->residentKey = $userVerificationType;
         }
 
         if ($crossPlatform) {
@@ -103,9 +103,9 @@ class AuthenticatorSelection implements JsonSerializable
      *
      * @return string
      */
-    public function getResidentKeyType(): string
+    public function getResidentKey(): string
     {
-        return $this->residentKeyType;
+        return $this->residentKey;
     }
 
     /**
@@ -121,9 +121,9 @@ class AuthenticatorSelection implements JsonSerializable
      *
      * @return string
      */
-    public function getUserVerificationType(): string
+    public function getUserVerification(): string
     {
-        return $this->userVerificationType;
+        return $this->userVerification;
     }
 
     /**
