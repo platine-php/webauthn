@@ -6,6 +6,8 @@ namespace Platine\Test\Webauthn;
 
 use org\bovigo\vfs\vfsStream;
 use Platine\Dev\PlatineTestCase;
+use Platine\Webauthn\Attestation\AttestationData;
+use Platine\Webauthn\Attestation\AuthenticatorData;
 use Platine\Webauthn\Entity\PublicKey;
 use Platine\Webauthn\Entity\RelyingParty;
 use Platine\Webauthn\Enum\KeyFormat;
@@ -16,6 +18,7 @@ use Platine\Webauthn\WebauthnConfiguration;
 
 use function Platine\Test\Fixture\Webauthn\getAuthClientDataJson;
 use function Platine\Test\Fixture\Webauthn\getCborAttestationDataTestData;
+use function Platine\Test\Fixture\Webauthn\getCborAuthenticatorDataTestData;
 use function Platine\Test\Fixture\Webauthn\getCborRegistrationAttestationDataTestData;
 use function Platine\Test\Fixture\Webauthn\getRegistrationClientDataJson;
 
@@ -49,6 +52,7 @@ class WebauthnTest extends PlatineTestCase
             $this->getPropertyValue(Webauthn::class, $o, 'config')
         );
         $this->assertInstanceOf(Webauthn::class, $o);
+        $this->assertNull($o->getChallenge());
     }
 
     public function testConstructorMissingOpenSSL(): void
@@ -281,6 +285,32 @@ class WebauthnTest extends PlatineTestCase
         );
     }
 
+    public function testProcessRegistrationInvalidOriginScheme(): void
+    {
+        $cfg = new WebauthnConfiguration([
+            'relying_party_id' => 'platine.com'
+        ]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('KXODAvwL2IfhAu8t0fEKcJ9E96sHMkhi8pFIzo675i8');
+        $clientDataJson = base64_decode(
+            'eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiS1hPREF2d0wy'
+                . 'SWZoQXU4dDBmRUtjSjlFOTZzSE1raGk4cEZJem82NzVpOCIsIm9yaWdpbi'
+                . 'I6Imh0dHA6Ly9wbGF0aW5lLmNvbSIsImNyb3NzT3JpZ2luIjpmYWxzZX0'
+        );
+        $attestationObject = getCborAttestationDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processRegistration(
+            $clientDataJson,
+            $attestationObject,
+            $challenge,
+            false,
+            true,
+            true
+        );
+    }
+
     public function testProcessRegistrationInvalidRelyingId(): void
     {
         $cfg = new WebauthnConfiguration([]);
@@ -380,8 +410,97 @@ class WebauthnTest extends PlatineTestCase
         );
     }
 
-    public function testProcessRegistration(): void
+    public function testProcessRegistrationUserIsNotPresent(): void
     {
+        global $mock_unpack_to_array;
+
+        $mock_unpack_to_array = [
+            'Cflags' => ['flags' => 24]
+        ];
+
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('rB8+2+FiHg9N4SC6lGgLu53fhszdE1/NJZZx/wQqBzA=');
+        $clientDataJson = getRegistrationClientDataJson();
+        $attestationObject = getCborRegistrationAttestationDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processRegistration(
+            $clientDataJson,
+            $attestationObject,
+            $challenge,
+            false,
+            true,
+            true
+        );
+    }
+
+    public function testProcessRegistrationUserIsNotVerified(): void
+    {
+        global $mock_unpack_to_array;
+
+        $mock_unpack_to_array = [
+            'Cflags' => ['flags' => 65]
+        ];
+
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('rB8+2+FiHg9N4SC6lGgLu53fhszdE1/NJZZx/wQqBzA=');
+        $clientDataJson = getRegistrationClientDataJson();
+        $attestationObject = getCborRegistrationAttestationDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processRegistration(
+            $clientDataJson,
+            $attestationObject,
+            $challenge,
+            true,
+            true,
+            true
+        );
+    }
+
+    public function testProcessRegistrationInvalidCertificateSignature(): void
+    {
+        $rp = $this->getMockInstance(RelyingParty::class);
+        $authData = $this->getMockInstance(AuthenticatorData::class);
+        $attesData = $this->getMockInstance(AttestationData::class, [
+            'getAuthenticatorData' => $authData,
+            'validateRelyingPartyIdHash' => true,
+        ]);
+
+        $o = $this->getMockInstance(Webauthn::class, [
+            'createAttestationData' => $attesData,
+            'checkOrigin' => true,
+        ], [
+            'processRegistration',
+        ]);
+        $this->setPropertyValue(Webauthn::class, $o, 'relyingParty', $rp);
+
+        $challenge = base64_decode('rB8+2+FiHg9N4SC6lGgLu53fhszdE1/NJZZx/wQqBzA=');
+        $clientDataJson = getRegistrationClientDataJson();
+        $attestationObject = getCborRegistrationAttestationDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processRegistration(
+            $clientDataJson,
+            $attestationObject,
+            $challenge,
+            true,
+            true,
+            true
+        );
+    }
+
+    public function testProcessRegistrationSuccess(): void
+    {
+        global $mock_unpack_to_array;
+
+        $mock_unpack_to_array = [
+            'Nsigncount' => ['signcount' => 24]
+        ];
         $cfg = new WebauthnConfiguration([]);
         $o = new Webauthn($cfg);
 
@@ -407,9 +526,328 @@ class WebauthnTest extends PlatineTestCase
         $this->assertEquals('', $data['cert_issuer']);
         $this->assertEquals('', $data['cert_subject']);
         $this->assertFalse($data['is_root_cert_valid']);
-        $this->assertEquals(0, $data['signature_counter']);
+        $this->assertEquals(24, $data['signature_counter']);
         $this->assertEquals('00000000000000000000000000000000', $data['aaguid']);
         $this->assertTrue($data['is_user_present']);
         $this->assertTrue($data['is_user_verified']);
+    }
+
+    public function testProcessAuthInvalidClientJson(): void
+    {
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = 'foochallenge';
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = '{f';
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthInvalidClientType(): void
+    {
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = 'foochallenge';
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getRegistrationClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthInvalidChallenge(): void
+    {
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = 'foochallenge';
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthInvalidOrigin(): void
+    {
+        $cfg = new WebauthnConfiguration([
+            'relying_party_id' => 'platine.com'
+        ]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthInvalidRelyingPartidIdHash(): void
+    {
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $relyingParty = $this->getMockInstance(RelyingParty::class, [
+            'getHashId' => '1',
+            'getId' => 'localhost',
+        ]);
+        $this->setPropertyValue(Webauthn::class, $o, 'relyingParty', $relyingParty);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthUserIsNotPresent(): void
+    {
+        global $mock_openssl_pkey_get_public_to_value,
+                $mock_openssl_verify_to_value,
+                $mock_unpack_to_array;
+
+        $mock_unpack_to_array = [
+            'Cflags' => ['flags' => 24]
+        ];
+        $mock_openssl_pkey_get_public_to_value = true;
+        $mock_openssl_verify_to_value = 1;
+
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthUserIsNotVerified(): void
+    {
+        global $mock_openssl_pkey_get_public_to_value,
+                $mock_openssl_verify_to_value,
+                $mock_unpack_to_array;
+
+        $mock_unpack_to_array = [
+            'Cflags' => ['flags' => 65]
+        ];
+        $mock_openssl_pkey_get_public_to_value = true;
+        $mock_openssl_verify_to_value = 1;
+
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthInvalidSignature(): void
+    {
+        global $mock_openssl_pkey_get_public_to_value, $mock_openssl_verify_to_value;
+
+        $mock_openssl_pkey_get_public_to_value = true;
+        $mock_openssl_verify_to_value = -1;
+
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthInvalidPublickKey(): void
+    {
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+    }
+    public function testProcessAuthInvalidSignatureCounter(): void
+    {
+        global $mock_openssl_pkey_get_public_to_value, $mock_openssl_verify_to_value;
+
+        $mock_openssl_pkey_get_public_to_value = true;
+        $mock_openssl_verify_to_value = 1;
+
+        $rp = $this->getMockInstance(RelyingParty::class);
+        $authData = $this->getMockInstance(AuthenticatorData::class, [
+            'isUserPresent' => true,
+            'isUserVerified' => true,
+            'getSignatureCount' => 1,
+        ]);
+
+        $o = $this->getMockInstance(Webauthn::class, [
+            'createAuthenticatorData' => $authData,
+            'checkOrigin' => true,
+        ], [
+            'processAuthentication',
+        ]);
+        $this->setPropertyValue(Webauthn::class, $o, 'relyingParty', $rp);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $this->expectException(WebauthnException::class);
+        $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            4,
+            true,
+            true
+        );
+    }
+
+    public function testProcessAuthSuccess(): void
+    {
+        global $mock_openssl_pkey_get_public_to_value, $mock_openssl_verify_to_value;
+
+        $mock_openssl_pkey_get_public_to_value = true;
+        $mock_openssl_verify_to_value = 1;
+
+        $cfg = new WebauthnConfiguration([]);
+        $o = new Webauthn($cfg);
+
+        $challenge = base64_decode('HWE2iUXeza6DQSL23+SgTpgh4N/z9OJfopSU6w6J3u8');
+        $signature = 'signature';
+        $credentialPublicKey = 'credentialPublicKey';
+        $clientDataJson = getAuthClientDataJson();
+        $authenticatorData = getCborAuthenticatorDataTestData();
+
+        $res = $o->processAuthentication(
+            $clientDataJson,
+            $authenticatorData,
+            $signature,
+            $credentialPublicKey,
+            $challenge,
+            null,
+            true,
+            true
+        );
+
+        $this->assertTrue($res);
     }
 }

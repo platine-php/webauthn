@@ -20,6 +20,28 @@ namespace Platine\Webauthn;
 $mock_function_exists_to_false = false;
 $mock_openssl_get_md_methods_to_empty = false;
 $mock_hex2bin_to_false = false;
+$mock_openssl_pkey_get_public_to_value = false;
+$mock_openssl_verify_to_value = false;
+
+function openssl_verify($data, $signature, $public_key, $algorithm)
+{
+    global $mock_openssl_verify_to_value;
+    if ($mock_openssl_verify_to_value) {
+        return $mock_openssl_verify_to_value;
+    }
+
+    return \openssl_verify($data, $signature, $public_key, $algorithm);
+}
+
+function openssl_pkey_get_public($public_key)
+{
+    global $mock_openssl_pkey_get_public_to_value;
+    if ($mock_openssl_pkey_get_public_to_value) {
+        return $mock_openssl_pkey_get_public_to_value;
+    }
+
+    return \openssl_pkey_get_public($public_key);
+}
 
 function openssl_get_md_methods()
 {

@@ -294,7 +294,7 @@ class Webauthn
             throw new WebauthnException('Invalid origin provided');
         }
 
-        $attestation = new AttestationData($attestationObject, $this->formats);
+        $attestation = $this->createAttestationData($attestationObject);
 
         // 9. Verify that the RP ID hash in authData is indeed the SHA-256
         // hash of the RP ID expected by the RP.
@@ -382,7 +382,7 @@ class Webauthn
             $challenge =  new ByteBuffer($challenge);
         }
         $clientDataHash = hash('sha256', $clientDataJson, true);
-        $authenticator = new AuthenticatorData($authenticatorData);
+        $authenticator = $this->createAuthenticatorData($authenticatorData);
         try {
             // 5. Let JSON text be the result of running UTF-8 decode on the value of cData.
             $clientData = Json::decode($clientDataJson);
@@ -497,6 +497,26 @@ class Webauthn
         return $this->challenge;
     }
 
+
+    /**
+     * Create the attestation data instance
+     * @param string $attestationObject
+     * @return AttestationData
+     */
+    protected function createAttestationData(string $attestationObject): AttestationData
+    {
+        return new AttestationData($attestationObject, $this->formats);
+    }
+
+    /**
+     * Create the authenticator data instance
+     * @param string $authenticatorData
+     * @return AuthenticatorData
+     */
+    protected function createAuthenticatorData(string $authenticatorData): AuthenticatorData
+    {
+        return new AuthenticatorData($authenticatorData);
+    }
 
     /**
      * Check the given origin
