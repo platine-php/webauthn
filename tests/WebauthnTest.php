@@ -849,5 +849,6 @@ class WebauthnTest extends PlatineTestCase
         );
 
         $this->assertTrue($res);
+        $this->assertEquals(0, $o->getSignatureCounter());
     }
 }

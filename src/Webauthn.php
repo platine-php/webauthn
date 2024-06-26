@@ -497,6 +497,15 @@ class Webauthn
         return $this->challenge;
     }
 
+    /**
+     * Return the current signature counter
+     * @return int
+     */
+    public function getSignatureCounter(): int
+    {
+        return $this->signatureCounter;
+    }
+
 
     /**
      * Create the attestation data instance

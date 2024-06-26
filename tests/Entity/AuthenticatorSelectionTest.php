@@ -7,7 +7,6 @@ namespace Platine\Test\Webauthn\Entity;
 use Platine\Dev\PlatineTestCase;
 use Platine\Webauthn\Entity\AuthenticatorSelection;
 use Platine\Webauthn\Enum\UserVerificationType;
-use Platine\Webauthn\Helper\ByteBuffer;
 
 /**
  * AuthenticatorSelection class tests
