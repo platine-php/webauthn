@@ -123,7 +123,7 @@ class Webauthn
      * @param string|array<string> $path
      * @return $this
      */
-    public function addRootCertificate($path): self
+    public function addRootCertificate(string|array $path): self
     {
         if (is_array($path)) {
             foreach ($path as $p) {
@@ -247,7 +247,7 @@ class Webauthn
      * Process the user registration
      * @param string $clientDataJson
      * @param string $attestationObject
-     * @param string|ByteBuffer $challenge
+     * @param ByteBuffer|string $challenge
      * @param bool $requireUserVerification
      * @param bool $requireUserPresent
      * @param bool $failIfRootCertificateMismatch
@@ -256,7 +256,7 @@ class Webauthn
     public function processRegistration(
         string $clientDataJson,
         string $attestationObject,
-        $challenge,
+        ByteBuffer|string $challenge,
         bool $requireUserVerification = false,
         bool $requireUserPresent = true,
         bool $failIfRootCertificateMismatch = true
@@ -373,7 +373,7 @@ class Webauthn
         string $authenticatorData,
         string $signature,
         string $credentialPublicKey,
-        $challenge,
+        ByteBuffer|string $challenge,
         ?int $previousSignatureCount = null,
         bool $requireUserVerification = false,
         bool $requireUserPresent = true

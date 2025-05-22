@@ -35,15 +35,16 @@ namespace Platine\Webauthn\Helper;
 
 use Exception;
 use JsonSerializable;
-use Platine\Webauthn\Exception\WebauthnException;
 use Platine\Stdlib\Helper\Json;
+use Platine\Webauthn\Exception\WebauthnException;
 use Serializable;
+use Stringable;
 
 /**
  * @class ByteBuffer
  * @package Platine\Webauthn\Helper
  */
-class ByteBuffer implements JsonSerializable, Serializable
+class ByteBuffer implements JsonSerializable, Serializable, Stringable
 {
     /**
      * Whether to use Base64 URL encoding
@@ -338,11 +339,11 @@ class ByteBuffer implements JsonSerializable, Serializable
     }
 
     /**
-     * Return the json data
+     * Return the JSON data
      * @param int $options
-     * @return array<mixed>|object
+     * @return mixed
      */
-    public function getJson(int $options = 0)
+    public function getJson(int $options = 0): mixed
     {
         try {
             $data = Json::decode($this->getBinaryString(), false, 512, $options);
@@ -395,7 +396,7 @@ class ByteBuffer implements JsonSerializable, Serializable
     * {@inheritdoc}
     * @return mixed
     */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         if ($this->useBase64UrlEncoding) {
             return self::base64UrlEncode($this->data);
@@ -420,7 +421,7 @@ class ByteBuffer implements JsonSerializable, Serializable
     * {@inheritdoc}
     * $param string $data
     */
-    public function unserialize($data): void
+    public function unserialize(string $data): void
     {
         $value = unserialize($data);
         if ($value === false) {

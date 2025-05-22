@@ -43,18 +43,6 @@ use Platine\Webauthn\Attestation\AuthenticatorData;
 abstract class BaseFormat implements JsonSerializable
 {
     /**
-     * The attestation object data
-     * @var array<string|int, mixed>
-     */
-    protected array $attestationData;
-
-    /**
-     * The AuthenticatorData instance
-     * @var AuthenticatorData
-     */
-    protected AuthenticatorData $authenticatorData;
-
-    /**
      * The X5C Chain data
      * @var array<string>
      */
@@ -72,11 +60,9 @@ abstract class BaseFormat implements JsonSerializable
      * @param AuthenticatorData $authenticatorData
      */
     public function __construct(
-        array $attestationData,
-        AuthenticatorData $authenticatorData
+        protected array $attestationData,
+        protected AuthenticatorData $authenticatorData
     ) {
-        $this->attestationData = $attestationData;
-        $this->authenticatorData = $authenticatorData;
     }
 
     /**
@@ -141,7 +127,7 @@ abstract class BaseFormat implements JsonSerializable
     * {@inheritdoc}
     * @return mixed
     */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return get_object_vars($this);
     }

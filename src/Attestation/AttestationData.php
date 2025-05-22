@@ -60,7 +60,7 @@ class AttestationData implements JsonSerializable
      * The attestation format
      * @var BaseFormat|FidoU2F|None|Packed
      */
-    protected $format;
+    protected BaseFormat|FidoU2F|None|Packed $format;
 
     /**
      * The attestation format name
@@ -107,7 +107,7 @@ class AttestationData implements JsonSerializable
      *
      * @return BaseFormat|FidoU2F|None|Packed
      */
-    public function getFormat()
+    public function getFormat(): BaseFormat|FidoU2F|None|Packed
     {
         return $this->format;
     }
@@ -191,7 +191,7 @@ class AttestationData implements JsonSerializable
     * {@inheritdoc}
     * @return mixed
     */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return get_object_vars($this);
     }

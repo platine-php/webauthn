@@ -125,6 +125,7 @@ class PublicKey implements JsonSerializable
             new PublicKeyCredentialParam(-7),
             new PublicKeyCredentialParam(-257),
         ];
+
         return $this;
     }
 
@@ -296,7 +297,7 @@ class PublicKey implements JsonSerializable
      * @param ByteBuffer|string $challenge
      * @return $this
      */
-    public function setChallenge($challenge): self
+    public function setChallenge(ByteBuffer|string $challenge): self
     {
         if (is_string($challenge)) {
             $challenge = new ByteBuffer($challenge);
@@ -376,7 +377,7 @@ class PublicKey implements JsonSerializable
     * {@inheritdoc}
     * @return mixed
     */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return get_object_vars($this);
     }

@@ -55,7 +55,7 @@ class CborDecoder
      * @param ByteBuffer|string $data
      * @return mixed
      */
-    public static function decode($data)
+    public static function decode(ByteBuffer|string $data): mixed
     {
         if (! $data instanceof ByteBuffer) {
             $data = new ByteBuffer($data);
@@ -80,8 +80,11 @@ class CborDecoder
      * @param int|null $endOffset
      * @return mixed
      */
-    public static function decodeInPlace($data, int $startoffset, ?int $endOffset = null)
-    {
+    public static function decodeInPlace(
+        ByteBuffer|string $data,
+        int $startoffset,
+        ?int $endOffset = null
+    ): mixed {
         if (! $data instanceof ByteBuffer) {
             $data = new ByteBuffer($data);
         }
@@ -99,7 +102,7 @@ class CborDecoder
      * @param int $offset
      * @return mixed
      */
-    protected static function parseItem(ByteBuffer $buffer, int &$offset)
+    protected static function parseItem(ByteBuffer $buffer, int &$offset): mixed
     {
         $first = $buffer->getByteValue($offset++);
         $type = $first >> 5;
@@ -120,7 +123,7 @@ class CborDecoder
      * @param int $offset
      * @return mixed
      */
-    protected static function parseSimpleFloat(int $value, ByteBuffer $buffer, int &$offset)
+    protected static function parseSimpleFloat(int $value, ByteBuffer $buffer, int &$offset): mixed
     {
         switch ($value) {
             case 24:
@@ -188,7 +191,7 @@ class CborDecoder
      * @param int $offset
      * @return mixed
      */
-    protected static function parseItemData(int $type, int $value, ByteBuffer $buffer, int &$offset)
+    protected static function parseItemData(int $type, int $value, ByteBuffer $buffer, int &$offset): mixed
     {
         switch ($type) {
             case self::CBOR_MAJOR_UNSIGNED_INT:

@@ -45,6 +45,7 @@ class Tpm extends BaseFormat
 {
     public const TPM_GENERATED_VALUE = "\xFF\x54\x43\x47";
     public const TPM_ST_ATTEST_CERTIFY = "\x80\x17";
+
     /**
      * The algorithm used
      * @var int

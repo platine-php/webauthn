@@ -65,7 +65,7 @@ abstract class BaseCredential implements JsonSerializable
      * @param ByteBuffer|string $id
      * @param array<string> $transports
      */
-    public function __construct($id, array $transports = [])
+    public function __construct(ByteBuffer|string $id, array $transports = [])
     {
         if (is_string($id)) {
             $id = new ByteBuffer($id);
@@ -108,7 +108,7 @@ abstract class BaseCredential implements JsonSerializable
     * {@inheritdoc}
     * @return mixed
     */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return get_object_vars($this);
     }

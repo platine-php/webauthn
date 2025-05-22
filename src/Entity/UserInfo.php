@@ -66,7 +66,7 @@ class UserInfo implements JsonSerializable
      * @param string $name
      * @param string $displayName
      */
-    public function __construct($id, string $name, string $displayName)
+    public function __construct(ByteBuffer|string $id, string $name, string $displayName)
     {
         if (is_string($id)) {
             $id = new ByteBuffer($id);
@@ -108,7 +108,7 @@ class UserInfo implements JsonSerializable
     * {@inheritdoc}
     * @return mixed
     */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return get_object_vars($this);
     }
