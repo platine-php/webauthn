@@ -395,6 +395,7 @@ class ByteBuffer implements JsonSerializable, Serializable
     * {@inheritdoc}
     * @return mixed
     */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         if ($this->useBase64UrlEncoding) {
